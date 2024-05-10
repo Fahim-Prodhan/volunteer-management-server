@@ -30,6 +30,12 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
 
+    const volunteerCollection = client.db('volunnetDB').collection('volunteerCollections')
+
+    app.get('/volunteerPosts', async(req,res)=>{
+      const result = await volunteerCollection.find().sort({_id: -1}).toArray()
+      res.send(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
