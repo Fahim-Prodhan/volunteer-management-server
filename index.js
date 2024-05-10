@@ -32,8 +32,16 @@ async function run() {
 
     const volunteerCollection = client.db('volunnetDB').collection('volunteerCollections')
 
+    // Volunteer
     app.get('/volunteerPosts', async(req,res)=>{
       const result = await volunteerCollection.find().sort({_id: -1}).toArray()
+      res.send(result)
+    })
+
+    app.post('/volunteerPost', async(req, res)=>{
+      const body = req.body
+      console.log(body);
+      const result = await volunteerCollection.insertOne(body)
       res.send(result)
     })
 
