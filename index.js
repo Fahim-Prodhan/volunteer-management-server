@@ -34,21 +34,40 @@ async function run() {
 
     // Volunteer
     app.get('/volunteerPosts', async(req,res)=>{
-      const result = await volunteerCollection.find().sort({_id: -1}).toArray()
+      const page = parseInt(req.query.page)
+      const size = parseInt(req.query.size)
+      const text = req.query.search
+      let query = {
+        title: {$regex : text, $options:'i'}
+      }
+      const result = await volunteerCollection.find(query)
+      .skip(page*size)
+      .limit(size)
+      .sort({_id: -1}).toArray()
       res.send(result)
+    })
+
+    
+    app.get('/volunteerPost/:id', async(req, res)=>{
+      const id = req.params.id
+      const query =  {_id: new ObjectId(id)}
+      const result = await volunteerCollection.findOne(query)
+      res.send(result)
+    })
+
+    app.get('/postCounts', async(req, res)=>{
+      const text = req.query.search
+      let query = {
+        title: {$regex : text, $options:'i'}
+      }
+      const result = await volunteerCollection.countDocuments(query)
+      res.send({count: result})
     })
 
     app.post('/volunteerPost', async(req, res)=>{
       const body = req.body
       console.log(body);
       const result = await volunteerCollection.insertOne(body)
-      res.send(result)
-    })
-
-    app.get('/volunteerPost/:id', async(req, res)=>{
-      const id = req.params.id
-      const query =  {_id: new ObjectId(id)}
-      const result = await volunteerCollection.findOne(query)
       res.send(result)
     })
 
