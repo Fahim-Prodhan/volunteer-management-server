@@ -154,6 +154,28 @@ async function run() {
       }
     });
 
+    app.put('/myPost/update/:id', async(req, res)=>{
+      const id = req.params.id
+      const post = req.body
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatePost = {
+        $set: {
+          image:post.image,
+          title:post.title,
+          description:post.description,
+          category:post.category,
+          location:post.location,
+          volunteers_needed:post.volunteers_needed,
+          deadline:post.deadline,
+          email:post.email,
+          name:post.name,
+        }
+      }
+      const result = await volunteerCollection.updateOne(filter, updatePost, options);
+      res.send(result);
+    })
+
     app.get("/myRequestedPosts", verifyToken, async (req, res) => {
       if (req.query.email != req.user.email) {
         return res.status(403).send({ message: "forbidden" });
