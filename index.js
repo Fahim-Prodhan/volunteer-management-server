@@ -79,7 +79,7 @@ async function run() {
         .find(query)
         .skip(page * size)
         .limit(size)
-        .sort({ _id: -1 })
+        .sort({ _id: 1 })
         .toArray();
       res.send(result);
     });
@@ -187,6 +187,12 @@ async function run() {
       const result = await BeVolunteerCollection.find(query).toArray();
       res.send(result);
     });
+
+
+    app.post('/logout', async(req,res)=>{
+      const user = req.body
+      res.clearCookie('token', {maxAge:0}).send({success:true})
+  })
 
     await client.db("admin").command({ ping: 1 });
     console.log(
