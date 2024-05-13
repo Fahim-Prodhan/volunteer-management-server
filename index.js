@@ -10,7 +10,7 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173","https://volunnet-1c3ea.web.app"],
     credentials: true,
   })
 );
@@ -141,7 +141,10 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/myPosts/:id", async (req, res) => {
+    app.delete("/myPosts/:id", verifyToken, async (req, res) => {
+      if (req.query.email != req.user.email) {
+        return res.status(403).send({ message: "forbidden" });
+      }
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const find = await volunteerCollection.findOne(query);
@@ -191,17 +194,28 @@ async function run() {
       res.send(result);
     });
 
+    app.delete('/myRequestedPosts/:id', verifyToken, async(req, res)=>{
+      if (req.query.email != req.user.email) {
+        return res.status(403).send({ message: "forbidden" });
+      }
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await BeVolunteerCollection.deleteOne(query);
+      res.send(result);
+    })
+
 
     app.post('/logout', async(req,res)=>{
       const user = req.body
       res.clearCookie('token', {maxAge:0}).send({success:true})
   })
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
+
   }
 }
 run().catch(console.dir);
