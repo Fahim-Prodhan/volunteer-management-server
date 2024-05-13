@@ -79,7 +79,7 @@ async function run() {
         .find(query)
         .skip(page * size)
         .limit(size)
-        .sort({ _id: 1 })
+        .sort({ _id: -1 })
         .toArray();
       res.send(result);
     });
@@ -108,7 +108,10 @@ async function run() {
       res.send({ count: result });
     });
 
-    app.post("/volunteerPost", async (req, res) => {
+    app.post("/volunteerPost", verifyToken, async (req, res) => {
+      if (req.query.email != req.user.email) {
+        return res.status(403).send({ message: "forbidden" });
+      }
       const body = req.body;
       // console.log(body);
       const result = await volunteerCollection.insertOne(body);
@@ -127,9 +130,6 @@ async function run() {
     });
 
     app.get("/myPosts", verifyToken, async (req, res) => {
-      // console.log(req.query.email);
-      // console.log('token = ', req.cookies);
-      // console.log('user in valid token', req.user)
       if (req.query.email != req.user.email) {
         return res.status(403).send({ message: "forbidden" });
       }
@@ -137,7 +137,7 @@ async function run() {
       if (req.query?.email) {
         query = { email: req.query.email };
       }
-      const result = await volunteerCollection.find(query).toArray();
+      const result = await volunteerCollection.find(query).sort({_id: -1}).toArray();
       res.send(result);
     });
 
@@ -154,7 +154,10 @@ async function run() {
       }
     });
 
-    app.put('/myPost/update/:id', async(req, res)=>{
+    app.put('/myPost/update/:id', verifyToken, async(req, res)=>{
+      if (req.query.email != req.user.email) {
+        return res.status(403).send({ message: "forbidden" });
+      }
       const id = req.params.id
       const post = req.body
       const filter = { _id: new ObjectId(id) };
